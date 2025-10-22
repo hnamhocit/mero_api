@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirm Your Email</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: #f4f6f8;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 520px;
+        margin: 40px auto;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: white;
+        text-align: center;
+        padding: 28px 20px;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+      }
+
+      .body {
+        padding: 30px 40px;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      .code-box {
+        text-align: center;
+        background: #f1f5f9;
+        border-radius: 10px;
+        padding: 18px;
+        font-size: 28px;
+        font-weight: bold;
+        letter-spacing: 6px;
+        color: #1e3a8a;
+        margin: 20px 0;
+      }
+
+      .footer {
+        font-size: 13px;
+        text-align: center;
+        padding: 20px 40px;
+        color: #888;
+        background: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .footer a {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Email Confirmation</h1>
+      </div>
+
+      <div class="body">
+        <p>Hi <%= email %>,</p>
+        <p>
+          Thanks for signing up! Please use the following code to verify your
+          email address:
+        </p>
+
+        <div class="code-box"><%= verificationCode %></div>
+
+        <p>
+          This code will expire in <b>10 minutes</b>. If you didn’t request this
+          email, you can safely ignore it.
+        </p>
+      </div>
+
+      <div class="footer">
+        <p>© <%= new Date().getFullYear() %> HNCHAT</p>
+        <p><a href="https://hnchat.vercel.app">hnchat.vercel.app</a></p>
+      </div>
+    </div>
+  </body>
+</html>

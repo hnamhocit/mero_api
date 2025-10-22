@@ -1,0 +1,198 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model User {
+  id                        Int       @id @default(autoincrement())
+  displayName               String
+  email                     String    @unique
+  password                  String
+  bio                       String?
+  photoURL                  String?
+  photoId                   String?
+  backgroundURL             String?
+  backgroundId              String?
+  verificationCode          String?
+  verificationCodeExpiresAt DateTime?
+  isEmailVerified           Boolean   @default(false)
+  role                      Role      @default(USER)
+  sex                       Sex       @default(UNKNOWN)
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  // --- Relationships ---
+  sentRequests     FriendRequest[] @relation("FriendRequestFrom")
+  receivedRequests FriendRequest[] @relation("FriendRequestTo")
+
+  friends          Friendship[] @relation("UserFriends")
+  friendOf         Friendship[] @relation("FriendOf")
+
+  messages         Message[]
+  participants     Participant[]
+  messageDeletions MessageDeletion[]
+  uploadedAttachments Attachment[]
+  sessions Session[]
+}
+
+model Session {
+  id Int @id @default(autoincrement())
+  userId Int
+  token String @unique
+  expiresAt DateTime 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model FriendRequest {
+  id        Int      @id @default(autoincrement())
+  fromId    Int
+  toId      Int
+  message   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  from User @relation("FriendRequestFrom", fields: [fromId], references: [id])
+  to   User @relation("FriendRequestTo", fields: [toId], references: [id])
+
+  @@unique([fromId, toId])
+}
+
+model Friendship {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  friendId  Int
+  createdAt DateTime @default(now())
+
+  user   User @relation("UserFriends", fields: [userId], references: [id])
+  friend User @relation("FriendOf", fields: [friendId], references: [id])
+
+  @@unique([userId, friendId])
+}
+
+model Conversation {
+  id            Int              @id @default(autoincrement())
+  type          ConversationType @default(GROUP)
+  name          String?
+  photoURL      String?
+  photoId       String?
+  lastMessageId Int?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  // Relations
+  lastMessage   Message?      @relation("LastMessage", fields: [lastMessageId], references: [id])
+  messages      Message[]
+  attachments Attachment[]
+  participants  Participant[]
+}
+
+model Participant {
+  id                Int             @id @default(autoincrement())
+  conversationId    Int
+  userId            Int
+  role              ParticipantRole @default(MEMBER)
+  lastSeenMessageId Int?
+  joinedAt          DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+  user              User         @relation(fields: [userId], references: [id])
+  lastSeenMessage   Message?     @relation("LastSeenMessage", fields: [lastSeenMessageId], references: [id])
+
+  @@unique([conversationId, userId])
+}
+
+model Attachment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  url       String @unique
+  key       String @unique
+  originalName String
+  size Int
+  type String
+  messageId Int
+  conversationId Int 
+  userId Int
+
+  message Message @relation(fields: [messageId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+}
+
+model Message {
+  id             Int      @id @default(autoincrement())
+  content        String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+  isEdited       Boolean  @default(false)
+
+  conversationId Int
+  senderId       Int
+  replyId        Int?
+
+  // Relations
+  reply          Message?  @relation("MessageReplies", fields: [replyId], references: [id])
+  replies        Message[] @relation("MessageReplies")
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  sender         User         @relation(fields: [senderId], references: [id])
+  deletions      MessageDeletion[]
+  attachments Attachment[]
+
+  // Reverse relations
+  conversationAsLast Conversation[] @relation("LastMessage")
+  participantAsLast  Participant[]  @relation("LastSeenMessage")
+}
+
+model MessageDeletion {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  messageId Int
+  createdAt DateTime @default(now())
+
+  user      User    @relation(fields: [userId], references: [id])
+  message   Message @relation(fields: [messageId], references: [id])
+
+  @@unique([userId, messageId])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Sex {
+  MALE
+  FEMALE
+  UNKNOWN
+  OTHER
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
+enum ParticipantRole {
+  ADMIN
+  SUB_ADMIN
+  MEMBER
+}
