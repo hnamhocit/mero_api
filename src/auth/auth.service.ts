@@ -2,12 +2,11 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { generateVerificationCode, sendMail } from 'src/common/utils';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDTO, RegisterDTO } from './dtos';
@@ -73,7 +72,7 @@ export class AuthService {
     });
 
     if (!existingUser) {
-      throw new BadRequestException('Invalid credentials');
+      throw new BadRequestException('User not found');
     }
 
     const { password: hashedPassword, ...other } = existingUser;
@@ -98,14 +97,10 @@ export class AuthService {
       maxAge: REFRESH_TOKEN_TTL,
     });
 
-    res.json({
-      success: true,
-      msg: 'Logged in successfully',
-      data: { accessToken: tokens.accessToken },
-    });
+    return { accessToken: tokens.accessToken };
   }
 
-  register = async (payload: RegisterDTO, res: Response) => {
+  async register(payload: RegisterDTO, res: Response) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: payload.email },
     });
@@ -137,14 +132,10 @@ export class AuthService {
       maxAge: REFRESH_TOKEN_TTL,
     });
 
-    res.json({
-      success: true,
-      msg: 'Registered successfully',
-      data: { accessToken: tokens.accessToken },
-    });
-  };
+    return { accessToken: tokens.accessToken };
+  }
 
-  logout = async (req: Request, res: Response) => {
+  async logout(req: Request, res: Response) {
     const token = req.cookies?.refreshToken;
 
     if (token) {
@@ -157,10 +148,10 @@ export class AuthService {
       res.clearCookie('refreshToken');
     }
 
-    res.sendStatus(204);
-  };
+    return null;
+  }
 
-  refresh = async (req: Request, res: Response) => {
+  async refresh(req: Request, res: Response) {
     const token = req.cookies?.refreshToken;
     if (!token) {
       throw new UnauthorizedException('Unauthorized');
@@ -203,5 +194,5 @@ export class AuthService {
     return {
       accessToken: newTokens.accessToken,
     };
-  };
+  }
 }
