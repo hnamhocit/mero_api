@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { UploadModule } from './upload/upload.module';
 import { MeModule } from './me/me.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { EventsGateway } from './events/events.gateway';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { EventsGateway } from './events/events.gateway';
     UsersModule,
     UploadModule,
     MeModule,
+    EventsModule,
   ],
-  providers: [EventsGateway],
 })
 export class AppModule {}
