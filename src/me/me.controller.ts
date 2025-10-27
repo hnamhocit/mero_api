@@ -2,41 +2,41 @@ import { Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
 
 import { MeService } from './me.service';
 import { JwtAuthGuard } from 'src/common/guards';
-import { Request } from 'express';
 import { JwtPayload } from 'src/auth/jwt.strategy';
+import { User } from 'src/common/decorators';
 
 @Controller('me')
 @UseGuards(JwtAuthGuard)
 export class MeController {
-  constructor(private readonly meService: MeService) {}
+  constructor(private readonly meService: MeService) { }
 
   @Get()
-  getMe(@Req() req: Request) {
-    return this.meService.getMe(req.user as JwtPayload);
+  getMe(@User() user: JwtPayload) {
+    return this.meService.getMe(user);
   }
 
   @Put('/email-verified')
-  setEmailVerified(@Req() req: Request) {
-    return this.meService.setEmailVerified(req.user as JwtPayload);
+  setEmailVerified(@User() user: JwtPayload) {
+    return this.meService.setEmailVerified(user);
   }
 
   @Get('/ids')
-  getRequestAndFriendsIds(@Req() req: Request) {
-    return this.meService.getRequestAndFriendsIds(req.user as JwtPayload);
+  getRequestAndFriendsIds(@User() user: JwtPayload) {
+    return this.meService.getRequestAndFriendsIds(user);
   }
 
   @Get('/received-requests')
-  getReceivedRequests(@Req() req: Request) {
-    return this.meService.getReceivedRequests(req.user as JwtPayload);
+  getReceivedRequests(@User() user: JwtPayload) {
+    return this.meService.getReceivedRequests(user);
   }
 
   @Get('/friends')
-  getFriends(@Req() req: Request) {
-    return this.meService.getFriends(req.user as JwtPayload);
+  getFriends(@User() user: JwtPayload) {
+    return this.meService.getFriends(user);
   }
 
   @Get('/conversations')
-  getConversations(@Req() req: Request) {
-    return this.meService.getConversations(req.user as JwtPayload);
+  getConversations(@User() user: JwtPayload) {
+    return this.meService.getConversations(user);
   }
 }
